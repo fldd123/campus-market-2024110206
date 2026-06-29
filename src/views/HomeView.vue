@@ -1,4 +1,62 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { getTrades, type TradeItem } from '../api/trade'
+import { getLostFounds, type LostFoundItem } from '../api/lostFound'
+import { getGroupBuys, type GroupBuyItem } from '../api/groupBuy'
+import { getErrands, type ErrandItem } from '../api/errand'
+import ItemCard from '../components/ItemCard.vue'
+
+const router = useRouter()
+
+const trades = ref<TradeItem[]>([])
+const lostFounds = ref<LostFoundItem[]>([])
+const groupBuys = ref<GroupBuyItem[]>([])
+const errands = ref<ErrandItem[]>([])
+
+const today = '2026-06-29'
+
+const stats = ref({ totalTrades: 0, todayNew: 0, totalUsers: 0, satisfaction: 0 })
+const latestTrades = ref<TradeItem[]>([])
+
+onMounted(async () => {
+  const [tradesRes, lostRes, groupRes, errandRes] = await Promise.all([
+    getTrades(),
+    getLostFounds(),
+    getGroupBuys(),
+    getErrands(),
+  ])
+
+  trades.value = tradesRes.data
+  lostFounds.value = lostRes.data
+  groupBuys.value = groupRes.data
+  errands.value = errandRes.data
+
+  const todayNew = trades.value.filter((t) => t.publishTime === today).length
+
+  stats.value = {
+    totalTrades: trades.value.length,
+    todayNew,
+    totalUsers: 1280,
+    satisfaction: 98,
+  }
+
+  latestTrades.value = trades.value.slice(0, 4)
+})
+
+const categories = [
+  { name: '教材', icon: '📚', route: '/trade', query: { category: '教材' } },
+  { name: '数码', icon: '💻', route: '/trade', query: { category: '数码' } },
+  { name: '服饰', icon: '👔', route: '/trade', query: { category: '服饰' } },
+  { name: '生活', icon: '🛋', route: '/trade', query: { category: '生活' } },
+  { name: '娱乐', icon: '🎮', route: '/trade', query: { category: '娱乐' } },
+  { name: '校园服务', icon: '🏫', route: '/errand', query: {} },
+]
+
+function goCategory(cat: (typeof categories)[0]) {
+  router.push({ path: cat.route, query: cat.query })
+}
+</script>
 
 <template>
   <div class="page">
@@ -13,19 +71,19 @@
 
     <section class="stats-row">
       <div class="stat-card">
-        <span class="stat-num">128</span>
+        <span class="stat-num">{{ stats.totalTrades }}</span>
         <span class="stat-label">在售商品</span>
       </div>
       <div class="stat-card">
-        <span class="stat-num">56</span>
+        <span class="stat-num">{{ stats.todayNew }}</span>
         <span class="stat-label">今日新增</span>
       </div>
       <div class="stat-card">
-        <span class="stat-num">1.2k</span>
+        <span class="stat-num">{{ stats.totalUsers > 999 ? (stats.totalUsers / 1000).toFixed(1) + 'k' : stats.totalUsers }}</span>
         <span class="stat-label">注册用户</span>
       </div>
       <div class="stat-card">
-        <span class="stat-num">98%</span>
+        <span class="stat-num">{{ stats.satisfaction }}%</span>
         <span class="stat-label">满意率</span>
       </div>
     </section>
@@ -33,12 +91,35 @@
     <section class="categories">
       <h2>分类浏览</h2>
       <div class="cat-grid">
-        <div class="cat-item">📚 教材</div>
-        <div class="cat-item">💻 数码</div>
-        <div class="cat-item">👔 服饰</div>
-        <div class="cat-item">🛋 生活</div>
-        <div class="cat-item">🎮 娱乐</div>
-        <div class="cat-item">🏫 校园服务</div>
+        <div
+          v-for="cat in categories"
+          :key="cat.name"
+          class="cat-item"
+          @click="goCategory(cat)"
+        >
+          <span class="cat-icon">{{ cat.icon }}</span>
+          <span class="cat-name">{{ cat.name }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="latestTrades.length" class="latest">
+      <h2>最新商品</h2>
+      <div class="latest-grid">
+        <ItemCard
+          v-for="item in latestTrades"
+          :key="item.id"
+          :title="item.title"
+          :description="item.description"
+          :tag="item.category"
+          :location="item.location"
+          :time="item.publishTime"
+        >
+          <template #footer>
+            <strong>￥{{ item.price }}</strong>
+            <span class="condition">{{ item.condition }}</span>
+          </template>
+        </ItemCard>
       </div>
     </section>
   </div>
@@ -73,17 +154,27 @@
 }
 .stat-num { display: block; font-size: 24px; font-weight: 700; color: #2b7a4b; }
 .stat-label { font-size: 13px; color: #7a8a9e; margin-top: 4px; }
-.categories h2 { font-size: 18px; margin: 0 0 16px; color: #2c3e50; }
-.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.categories h2,
+.latest h2 { font-size: 18px; margin: 0 0 16px; color: #2c3e50; }
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
 .cat-item {
   background: #fff; border-radius: 10px; padding: 20px; text-align: center;
   font-size: 14px; color: #2c3e50; cursor: pointer; transition: all 0.2s;
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
 .cat-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+.cat-icon { font-size: 24px; }
+.cat-name { font-size: 14px; }
+.latest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.condition { margin-left: 12px; color: #6b7280; }
+@media (max-width: 900px) {
+  .latest-grid { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 640px) {
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .cat-grid { grid-template-columns: repeat(2, 1fr); }
   .hero { padding: 40px 16px 32px; }
+  .latest-grid { grid-template-columns: 1fr; }
 }
 </style>

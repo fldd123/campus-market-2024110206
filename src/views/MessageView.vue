@@ -1,24 +1,49 @@
 <script setup lang="ts">
-const names = ['李同学', '王学长', '陈学姐', '刘同学', '赵学长', '孙学姐'] as const
+import { onMounted, ref } from 'vue'
+import { getMessages, type MessageItem } from '../api/message'
+import EmptyState from '../components/EmptyState.vue'
+
+const messages = ref<MessageItem[]>([])
+const loading = ref(true)
+
+function formatTime(iso: string): string {
+  const date = new Date(iso)
+  const now = new Date()
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000)
+  if (diff < 60) return '刚刚'
+  if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`
+  return `${date.getMonth() + 1}/${date.getDate()}`
+}
+
+onMounted(async () => {
+  const res = await getMessages()
+  messages.value = res.data
+  loading.value = false
+})
 </script>
 
 <template>
   <div class="page">
     <div class="page-header">
       <h1>消息</h1>
-      <span class="badge">3 条未读</span>
+      <span v-if="messages.filter(m => m.unread).length" class="badge">
+        {{ messages.filter(m => m.unread).length }} 条未读
+      </span>
     </div>
 
-    <div class="msg-list">
-      <div class="msg-item" v-for="i in 6" :key="i">
-        <div class="msg-avatar"></div>
+    <EmptyState v-if="!loading && !messages.length" text="暂无消息" />
+
+    <div v-else class="msg-list">
+      <div v-for="item in messages" :key="item.id" class="msg-item" :class="{ unread: item.unread }">
+        <div class="msg-avatar">{{ item.sender.charAt(0) }}</div>
         <div class="msg-body">
           <div class="msg-top">
-            <span class="msg-name">{{ names[i - 1] }}</span>
-            <span class="msg-time">{{ i }}分钟前</span>
+            <span class="msg-name">{{ item.sender }}</span>
+            <span class="msg-time">{{ formatTime(item.time) }}</span>
           </div>
-          <p class="msg-text">你好，请问这件商品还在吗？诚心想要</p>
-          <span v-if="i <= 2" class="unread-dot">未读</span>
+          <p class="msg-text">{{ item.content }}</p>
+          <span v-if="item.unread" class="unread-dot">未读</span>
         </div>
       </div>
     </div>
@@ -37,9 +62,12 @@ const names = ['李同学', '王学长', '陈学姐', '刘同学', '赵学长', 
 }
 .msg-item:hover { background: #f8fafc; }
 .msg-item + .msg-item { margin-top: 8px; }
+.msg-item.unread { background: #f0f9ff; }
 .msg-avatar {
   width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
   background: linear-gradient(135deg, #c8e6c9, #81c784);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 16px;
 }
 .msg-body { flex: 1; min-width: 0; }
 .msg-top { display: flex; justify-content: space-between; margin-bottom: 4px; }

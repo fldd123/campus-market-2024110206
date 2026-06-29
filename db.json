@@ -1,0 +1,36 @@
+{
+  "trades": [
+    { "id": 1, "title": "高等数学（第七版）", "category": "教材", "price": 25, "condition": "九成新", "location": "二教", "publisher": "张学长", "publishTime": "2026-06-28", "image": "", "status": "在售", "description": "九成新，笔记完整，期末复习利器" },
+    { "id": 2, "title": "iPad Air 3", "category": "数码", "price": 1800, "condition": "九成新", "location": "宿舍区", "publisher": "李学姐", "publishTime": "2026-06-27", "image": "", "status": "在售", "description": "使用一年，功能完好，送保护壳" },
+    { "id": 3, "title": "羽毛球拍", "category": "娱乐", "price": 120, "condition": "全新", "location": "体育馆", "publisher": "王同学", "publishTime": "2026-06-27", "image": "", "status": "在售", "description": "尤尼克斯，仅用三次，近乎全新" },
+    { "id": 4, "title": "LED台灯", "category": "生活", "price": 35, "condition": "九成新", "location": "宿舍区", "publisher": "陈同学", "publishTime": "2026-06-26", "image": "", "status": "在售", "description": "LED护眼，三档调光，宿舍必备" },
+    { "id": 5, "title": "C语言程序设计", "category": "教材", "price": 30, "condition": "全新", "location": "一教", "publisher": "刘学长", "publishTime": "2026-06-26", "image": "", "status": "在售", "description": "全新未翻，附赠习题答案" },
+    { "id": 6, "title": "机械键盘", "category": "数码", "price": 150, "condition": "七成新", "location": "宿舍区", "publisher": "赵同学", "publishTime": "2026-06-25", "image": "", "status": "在售", "description": "青轴，87键，适合编程" }
+  ],
+  "lostFounds": [
+    { "id": 1, "title": "失物招领", "type": "found", "itemName": "蓝色水杯", "location": "二教", "eventTime": "2026-06-28", "contact": "张同学 138****1234", "status": "待认领", "description": "在二教203拾到，请失主联系" },
+    { "id": 2, "title": "寻物启事", "type": "lost", "itemName": "黑色钱包", "location": "食堂", "eventTime": "2026-06-27", "contact": "李同学 139****5678", "status": "寻找中", "description": "在食堂丢失，内有校园卡" },
+    { "id": 3, "title": "失物招领", "type": "found", "itemName": "U盘", "location": "图书馆", "eventTime": "2026-06-27", "contact": "王同学 137****9012", "status": "待认领", "description": "图书馆三楼捡到，32G银色" },
+    { "id": 4, "title": "寻物启事", "type": "lost", "itemName": "学生证", "location": "操场", "eventTime": "2026-06-26", "contact": "刘同学 136****3456", "status": "寻找中", "description": "姓名刘XX，学号2024****" }
+  ],
+  "groupBuys": [
+    { "id": 1, "title": "三只松鼠零食大礼包", "type": "零食", "targetCount": 5, "currentCount": 3, "deadline": "2026-07-05", "location": "菜鸟驿站", "publisher": "张同学", "status": "拼团中", "description": "满5人成团，享超低折扣价" },
+    { "id": 2, "title": "维达抽纸（24包）", "type": "日用品", "targetCount": 5, "currentCount": 4, "deadline": "2026-07-03", "location": "菜鸟驿站", "publisher": "李学姐", "status": "拼团中", "description": "整箱团购，宿舍拼单必备" },
+    { "id": 3, "title": "当季水果拼盘", "type": "水果", "targetCount": 5, "currentCount": 2, "deadline": "2026-07-06", "location": "水果店", "publisher": "王同学", "status": "拼团中", "description": "每日新鲜直送，成团即发" },
+    { "id": 4, "title": "开学文具套装", "type": "文具", "targetCount": 5, "currentCount": 5, "deadline": "2026-07-01", "location": "打印店", "publisher": "赵学姐", "status": "已成团", "description": "含笔、本、尺、修正带" }
+  ],
+  "messages": [
+    { "id": 1, "sender": "李同学", "avatar": "", "content": "你好，请问这件商品还在吗？诚心想要", "time": "2026-06-28T10:30:00", "unread": true },
+    { "id": 2, "sender": "王学长", "avatar": "", "content": "iPad 可以小刀吗？学生党预算有限", "time": "2026-06-28T09:15:00", "unread": true },
+    { "id": 3, "sender": "陈学姐", "avatar": "", "content": "台灯还在吗？我今晚可以来自取", "time": "2026-06-27T22:00:00", "unread": true },
+    { "id": 4, "sender": "刘同学", "avatar": "", "content": "羽毛球拍我收了，明天下午交易？", "time": "2026-06-27T15:45:00", "unread": false },
+    { "id": 5, "sender": "赵学长", "avatar": "", "content": "C语言书还有吗？我要了", "time": "2026-06-27T14:20:00", "unread": false },
+    { "id": 6, "sender": "孙学姐", "avatar": "", "content": "键盘手感怎么样？能再发张照片吗", "time": "2026-06-26T18:10:00", "unread": false }
+  ],
+  "errands": [
+    { "id": 1, "title": "取快递", "taskType": "取件", "reward": 5, "from": "菜鸟驿站", "to": "11栋宿舍", "deadline": "2026-06-30", "publisher": "李同学", "status": "待接单", "description": "帮忙送到宿舍楼下，谢谢" },
+    { "id": 2, "title": "买午饭", "taskType": "代购", "reward": 4, "from": "二食堂", "to": "11栋宿舍", "deadline": "2026-06-30", "publisher": "王同学", "status": "待接单", "description": "二食堂黄焖鸡米饭，送到11栋" },
+    { "id": 3, "title": "打印资料", "taskType": "跑腿", "reward": 6, "from": "打印店", "to": "图书馆", "deadline": "2026-07-01", "publisher": "赵学姐", "status": "进行中", "description": "50页复习资料，黑白双面打印" },
+    { "id": 4, "title": "送钥匙", "taskType": "跑腿", "reward": 3, "from": "宿舍区", "to": "图书馆", "deadline": "2026-06-29", "publisher": "刘同学", "status": "待接单", "description": "麻烦送到图书馆A区302" }
+  ]
+}
