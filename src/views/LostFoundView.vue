@@ -5,7 +5,11 @@
       <p>发布和查看校园内的失物与招领信息，互帮互助。</p>
     </div>
 
-    <div class="list">
+    <div v-if="error" class="error">{{ error }}</div>
+
+    <EmptyState v-if="!loading && !error && !lostFounds.length" text="暂无失物招领信息" />
+
+    <div v-else-if="lostFounds.length" class="list">
       <ItemCard
         v-for="item in lostFounds"
         :key="item.id"
@@ -26,13 +30,22 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import ItemCard from '../components/ItemCard.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { getLostFounds, type LostFoundItem } from '../api/lostFound'
 
 const lostFounds = ref<LostFoundItem[]>([])
+const loading = ref(true)
+const error = ref('')
 
 onMounted(async () => {
-  const res = await getLostFounds()
-  lostFounds.value = res.data
+  try {
+    const res = await getLostFounds()
+    lostFounds.value = res.data
+  } catch {
+    error.value = '数据加载失败，请确保后端服务已启动（npm run mock）'
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
@@ -67,5 +80,8 @@ onMounted(async () => {
 .contact {
   color: #2563eb;
   font-size: 13px;
+}
+.error {
+  background: #ffebee; color: #c62828; padding: 12px 20px; border-radius: 10px; text-align: center; font-size: 14px;
 }
 </style>

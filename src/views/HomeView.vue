@@ -6,6 +6,7 @@ import { getLostFounds, type LostFoundItem } from '../api/lostFound'
 import { getGroupBuys, type GroupBuyItem } from '../api/groupBuy'
 import { getErrands, type ErrandItem } from '../api/errand'
 import ItemCard from '../components/ItemCard.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const router = useRouter()
 
@@ -18,30 +19,38 @@ const today = '2026-06-29'
 
 const stats = ref({ totalTrades: 0, todayNew: 0, totalUsers: 0, satisfaction: 0 })
 const latestTrades = ref<TradeItem[]>([])
+const loading = ref(true)
+const error = ref('')
 
 onMounted(async () => {
-  const [tradesRes, lostRes, groupRes, errandRes] = await Promise.all([
-    getTrades(),
-    getLostFounds(),
-    getGroupBuys(),
-    getErrands(),
-  ])
+  try {
+    const [tradesRes, lostRes, groupRes, errandRes] = await Promise.all([
+      getTrades(),
+      getLostFounds(),
+      getGroupBuys(),
+      getErrands(),
+    ])
 
-  trades.value = tradesRes.data
-  lostFounds.value = lostRes.data
-  groupBuys.value = groupRes.data
-  errands.value = errandRes.data
+    trades.value = tradesRes.data
+    lostFounds.value = lostRes.data
+    groupBuys.value = groupRes.data
+    errands.value = errandRes.data
 
-  const todayNew = trades.value.filter((t) => t.publishTime === today).length
+    const todayNew = trades.value.filter((t) => t.publishTime === today).length
 
-  stats.value = {
-    totalTrades: trades.value.length,
-    todayNew,
-    totalUsers: 1280,
-    satisfaction: 98,
+    stats.value = {
+      totalTrades: trades.value.length,
+      todayNew,
+      totalUsers: 1280,
+      satisfaction: 98,
+    }
+
+    latestTrades.value = trades.value.slice(0, 4)
+  } catch {
+    error.value = '数据加载失败，请确保后端服务已启动（npm run mock）'
+  } finally {
+    loading.value = false
   }
-
-  latestTrades.value = trades.value.slice(0, 4)
 })
 
 const categories = [
@@ -56,6 +65,10 @@ const categories = [
 function goCategory(cat: (typeof categories)[0]) {
   router.push({ path: cat.route, query: cat.query })
 }
+
+function goTrade(item: TradeItem) {
+  router.push({ path: '/trade', query: { category: item.category } })
+}
 </script>
 
 <template>
@@ -68,6 +81,8 @@ function goCategory(cat: (typeof categories)[0]) {
         <router-link to="/publish" class="btn btn-outline">发布闲置</router-link>
       </div>
     </section>
+
+    <div v-if="error" class="error-banner">{{ error }}</div>
 
     <section class="stats-row">
       <div class="stat-card">
@@ -103,23 +118,29 @@ function goCategory(cat: (typeof categories)[0]) {
       </div>
     </section>
 
-    <section v-if="latestTrades.length" class="latest">
+    <section class="latest">
       <h2>最新商品</h2>
-      <div class="latest-grid">
-        <ItemCard
+      <EmptyState v-if="!loading && !latestTrades.length" text="暂无商品数据" />
+      <div v-else class="latest-grid">
+        <div
           v-for="item in latestTrades"
           :key="item.id"
-          :title="item.title"
-          :description="item.description"
-          :tag="item.category"
-          :location="item.location"
-          :time="item.publishTime"
+          class="latest-item"
+          @click="goTrade(item)"
         >
-          <template #footer>
-            <strong>￥{{ item.price }}</strong>
-            <span class="condition">{{ item.condition }}</span>
-          </template>
-        </ItemCard>
+          <ItemCard
+            :title="item.title"
+            :description="item.description"
+            :tag="item.category"
+            :location="item.location"
+            :time="item.publishTime"
+          >
+            <template #footer>
+              <strong>￥{{ item.price }}</strong>
+              <span class="condition">{{ item.condition }}</span>
+            </template>
+          </ItemCard>
+        </div>
       </div>
     </section>
   </div>
@@ -154,6 +175,10 @@ function goCategory(cat: (typeof categories)[0]) {
 }
 .stat-num { display: block; font-size: 24px; font-weight: 700; color: #2b7a4b; }
 .stat-label { font-size: 13px; color: #7a8a9e; margin-top: 4px; }
+.error-banner {
+  background: #ffebee; color: #c62828; padding: 12px 20px; border-radius: 10px;
+  margin-bottom: 20px; font-size: 14px; text-align: center;
+}
 .categories h2,
 .latest h2 { font-size: 18px; margin: 0 0 16px; color: #2c3e50; }
 .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
@@ -167,6 +192,8 @@ function goCategory(cat: (typeof categories)[0]) {
 .cat-icon { font-size: 24px; }
 .cat-name { font-size: 14px; }
 .latest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.latest-item { cursor: pointer; transition: transform 0.2s; }
+.latest-item:hover { transform: translateY(-2px); }
 .condition { margin-left: 12px; color: #6b7280; }
 @media (max-width: 900px) {
   .latest-grid { grid-template-columns: repeat(2, 1fr); }

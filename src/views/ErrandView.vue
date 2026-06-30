@@ -5,7 +5,11 @@
       <p>发布或接单跑腿任务，互帮互助便利校园生活。</p>
     </div>
 
-    <div class="list">
+    <div v-if="error" class="error">{{ error }}</div>
+
+    <EmptyState v-if="!loading && !error && !errands.length" text="暂无跑腿任务" />
+
+    <div v-else-if="errands.length" class="list">
       <ItemCard
         v-for="item in errands"
         :key="item.id"
@@ -27,13 +31,22 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import ItemCard from '../components/ItemCard.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { getErrands, type ErrandItem } from '../api/errand'
 
 const errands = ref<ErrandItem[]>([])
+const loading = ref(true)
+const error = ref('')
 
 onMounted(async () => {
-  const res = await getErrands()
-  errands.value = res.data
+  try {
+    const res = await getErrands()
+    errands.value = res.data
+  } catch {
+    error.value = '数据加载失败，请确保后端服务已启动（npm run mock）'
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
@@ -69,5 +82,8 @@ onMounted(async () => {
   margin-left: 12px;
   color: #6b7280;
   font-size: 13px;
+}
+.error {
+  background: #ffebee; color: #c62828; padding: 12px 20px; border-radius: 10px; text-align: center; font-size: 14px;
 }
 </style>

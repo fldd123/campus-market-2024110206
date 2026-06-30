@@ -5,7 +5,11 @@
       <p>找搭子一起拼单，省钱又省心。</p>
     </div>
 
-    <div class="list">
+    <div v-if="error" class="error">{{ error }}</div>
+
+    <EmptyState v-if="!loading && !error && !groupBuys.length" text="暂无拼单" />
+
+    <div v-else-if="groupBuys.length" class="list">
       <ItemCard
         v-for="item in groupBuys"
         :key="item.id"
@@ -26,13 +30,22 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import ItemCard from '../components/ItemCard.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { getGroupBuys, type GroupBuyItem } from '../api/groupBuy'
 
 const groupBuys = ref<GroupBuyItem[]>([])
+const loading = ref(true)
+const error = ref('')
 
 onMounted(async () => {
-  const res = await getGroupBuys()
-  groupBuys.value = res.data
+  try {
+    const res = await getGroupBuys()
+    groupBuys.value = res.data
+  } catch {
+    error.value = '数据加载失败，请确保后端服务已启动（npm run mock）'
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
@@ -68,5 +81,8 @@ onMounted(async () => {
   color: #2563eb;
   font-weight: 600;
   font-size: 13px;
+}
+.error {
+  background: #ffebee; color: #c62828; padding: 12px 20px; border-radius: 10px; text-align: center; font-size: 14px;
 }
 </style>

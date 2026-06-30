@@ -17,9 +17,14 @@ function formatTime(iso: string): string {
 }
 
 onMounted(async () => {
-  const res = await getMessages()
-  messages.value = res.data
-  loading.value = false
+  try {
+    const res = await getMessages()
+    messages.value = res.data
+  } catch {
+    messages.value = []
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
