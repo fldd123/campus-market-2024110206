@@ -1,13 +1,18 @@
 <template>
   <section class="page">
     <div class="page-header">
-      <h1>拼单搭子</h1>
+      <div class="page-header__title">
+        <Connection aria-hidden="true" style="color:#7c3aed;width:14px;height:14px;flex-shrink:0;display:block" />
+        <h1>拼单搭子</h1>
+      </div>
       <p>找搭子一起拼单，省钱又省心。</p>
     </div>
 
     <div v-if="error" class="error">{{ error }}</div>
 
-    <EmptyState v-if="!loading && !error && !groupBuys.length" text="暂无拼单" />
+    <div v-if="loading" class="loading">加载中...</div>
+
+    <EmptyState v-else-if="!error && !groupBuys.length" text="暂无拼单" />
 
     <div v-else-if="groupBuys.length" class="list">
       <ItemCard
@@ -18,9 +23,15 @@
         :tag="item.type"
         :location="item.location"
         :time="item.deadline"
+        color="purple"
       >
         <template #footer>
-          <span class="count">{{ item.currentCount }}/{{ item.targetCount }} 人</span>
+          <div class="count-bar">
+            <span class="count-label">{{ item.currentCount }}/{{ item.targetCount }} 人</span>
+            <div class="bar-track">
+              <div class="bar-fill" :style="{ width: Math.min(100, (item.currentCount / item.targetCount) * 100) + '%' }"></div>
+            </div>
+          </div>
         </template>
       </ItemCard>
     </div>
@@ -59,11 +70,21 @@ onMounted(async () => {
 .page-header {
   padding: 24px;
   border-radius: 16px;
-  background: #fff;
+  background: linear-gradient(135deg, #f5f3ff, #fff);
+  border-left: 4px solid #7c3aed;
 }
 
-.page-header h1 {
-  margin: 0 0 8px;
+.page-header__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.page-header__title h1 {
+  margin: 0;
+  color: #6d28d9;
 }
 
 .page-header p {
@@ -77,10 +98,30 @@ onMounted(async () => {
   gap: 16px;
 }
 
-.count {
+.count-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.count-label {
   color: #2563eb;
   font-weight: 600;
   font-size: 13px;
+}
+
+.bar-track {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: #7c3aed;
+  border-radius: 3px;
+  transition: width 0.4s ease;
 }
 .error {
   background: #ffebee; color: #c62828; padding: 12px 20px; border-radius: 10px; text-align: center; font-size: 14px;

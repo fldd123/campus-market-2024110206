@@ -1,7 +1,10 @@
 <template>
   <section class="page">
     <div class="page-header">
-      <h1>发布信息</h1>
+      <div class="page-header__title">
+        <Edit aria-hidden="true" style="color:#059669;width:14px;height:14px;flex-shrink:0;display:block" />
+        <h1>发布信息</h1>
+      </div>
       <p>选择发布类型，填写必要信息，让校园需求更快被看见。</p>
     </div>
 
@@ -124,10 +127,12 @@ import { createTrade } from '../api/trade'
 import { createLostFound } from '../api/lostFound'
 import { createGroupBuy } from '../api/groupBuy'
 import { createErrand } from '../api/errand'
+import { useUserStore } from '../stores/user'
 
 type PublishType = 'trade' | 'lostFound' | 'groupBuy' | 'errand'
 
 const router = useRouter()
+const userStore = useUserStore()
 const publishType = ref<PublishType>('trade')
 const submitting = ref(false)
 
@@ -331,7 +336,7 @@ async function handleSubmit() {
         price: form.price,
         condition: form.condition,
         location: form.location,
-        publisher: '当前用户',
+        publisher: userStore.displayName,
         publishTime: getCurrentTime(),
         image: '',
         status: '在售',
@@ -352,6 +357,7 @@ async function handleSubmit() {
         contact: form.contact,
         status: form.lostFoundType === 'lost' ? '寻找中' : '待认领',
         description: form.description,
+        publisher: userStore.displayName,
       })
 
       ElMessage.success('失物招领信息发布成功')
@@ -366,7 +372,7 @@ async function handleSubmit() {
         currentCount: 1,
         deadline: form.deadline,
         location: form.location,
-        publisher: '当前用户',
+        publisher: userStore.displayName,
         status: '拼团中',
         description: form.description,
       })
@@ -383,7 +389,7 @@ async function handleSubmit() {
         from: form.from,
         to: form.to,
         deadline: form.deadline,
-        publisher: '当前用户',
+        publisher: userStore.displayName,
         status: '待接单',
         description: form.description,
       })
@@ -409,11 +415,21 @@ async function handleSubmit() {
 .page-header {
   padding: 24px;
   border-radius: 16px;
-  background: #fff;
+  background: linear-gradient(135deg, #fdf2f8, #fff);
+  border-left: 4px solid #db2777;
 }
 
-.page-header h1 {
-  margin: 0 0 8px;
+.page-header__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.page-header__title h1 {
+  margin: 0;
+  color: #be185d;
 }
 
 .page-header p {
@@ -438,6 +454,15 @@ textarea {
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
 }
 
 textarea {
@@ -463,12 +488,20 @@ button:disabled {
 }
 
 .primary {
-  background: #2563eb;
+  background: #059669;
   color: #fff;
+}
+
+.primary:hover {
+  background: #047857;
 }
 
 .secondary {
   background: #f3f4f6;
   color: #374151;
+}
+
+.secondary:hover {
+  background: #e5e7eb;
 }
 </style>

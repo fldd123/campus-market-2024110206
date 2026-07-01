@@ -1,13 +1,18 @@
 <template>
   <section class="page">
     <div class="page-header">
-      <h1>失物招领</h1>
+      <div class="page-header__title">
+        <WarningFilled aria-hidden="true" style="color:#f59e0b;width:14px;height:14px;flex-shrink:0;display:block" />
+        <h1>失物招领</h1>
+      </div>
       <p>发布和查看校园内的失物与招领信息，互帮互助。</p>
     </div>
 
     <div v-if="error" class="error">{{ error }}</div>
 
-    <EmptyState v-if="!loading && !error && !lostFounds.length" text="暂无失物招领信息" />
+    <div v-if="loading" class="loading">加载中...</div>
+
+    <EmptyState v-else-if="!error && !lostFounds.length" text="暂无失物招领信息" />
 
     <div v-else-if="lostFounds.length" class="list">
       <ItemCard
@@ -18,9 +23,10 @@
         :tag="item.type === 'lost' ? '寻物' : '招领'"
         :location="item.location"
         :time="item.eventTime"
+        color="amber"
       >
         <template #footer>
-          <span class="contact">{{ item.contact }}</span>
+          <a :href="'tel:' + item.contact" class="contact">{{ item.contact }}</a>
         </template>
       </ItemCard>
     </div>
@@ -59,11 +65,21 @@ onMounted(async () => {
 .page-header {
   padding: 24px;
   border-radius: 16px;
-  background: #fff;
+  background: linear-gradient(135deg, #fffbeb, #fff);
+  border-left: 4px solid #f59e0b;
 }
 
-.page-header h1 {
-  margin: 0 0 8px;
+.page-header__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.page-header__title h1 {
+  margin: 0;
+  color: #b45309;
 }
 
 .page-header p {
@@ -80,6 +96,12 @@ onMounted(async () => {
 .contact {
   color: #2563eb;
   font-size: 13px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.contact:hover {
+  text-decoration: underline;
 }
 .error {
   background: #ffebee; color: #c62828; padding: 12px 20px; border-radius: 10px; text-align: center; font-size: 14px;

@@ -84,6 +84,9 @@ function goTrade(item: TradeItem) {
 
     <div v-if="error" class="error-banner">{{ error }}</div>
 
+    <div v-if="loading" class="loading">加载中...</div>
+
+    <template v-if="!loading">
     <section class="stats-row">
       <div class="stat-card">
         <span class="stat-num">{{ stats.totalTrades }}</span>
@@ -110,7 +113,11 @@ function goTrade(item: TradeItem) {
           v-for="cat in categories"
           :key="cat.name"
           class="cat-item"
+          tabindex="0"
+          role="button"
           @click="goCategory(cat)"
+          @keydown.enter="goCategory(cat)"
+          @keydown.space.prevent="goCategory(cat)"
         >
           <span class="cat-icon">{{ cat.icon }}</span>
           <span class="cat-name">{{ cat.name }}</span>
@@ -126,7 +133,11 @@ function goTrade(item: TradeItem) {
           v-for="item in latestTrades"
           :key="item.id"
           class="latest-item"
+          tabindex="0"
+          role="button"
           @click="goTrade(item)"
+          @keydown.enter="goTrade(item)"
+          @keydown.space.prevent="goTrade(item)"
         >
           <ItemCard
             :title="item.title"
@@ -134,6 +145,7 @@ function goTrade(item: TradeItem) {
             :tag="item.category"
             :location="item.location"
             :time="item.publishTime"
+            color="green"
           >
             <template #footer>
               <strong>￥{{ item.price }}</strong>
@@ -143,6 +155,7 @@ function goTrade(item: TradeItem) {
         </div>
       </div>
     </section>
+    </template>
   </div>
 </template>
 
@@ -162,10 +175,10 @@ function goTrade(item: TradeItem) {
   padding: 10px 28px; border-radius: 8px; font-size: 14px;
   text-decoration: none; font-weight: 600; transition: all 0.2s;
 }
-.btn-primary { background: #2b7a4b; color: #fff; }
-.btn-primary:hover { background: #1e5f38; }
-.btn-outline { border: 2px solid #2b7a4b; color: #2b7a4b; }
-.btn-outline:hover { background: #2b7a4b; color: #fff; }
+.btn-primary { background: #059669; color: #fff; }
+.btn-primary:hover { background: #047857; }
+.btn-outline { border: 2px solid #059669; color: #059669; }
+.btn-outline:hover { background: #059669; color: #fff; }
 .stats-row {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px;
 }
@@ -173,7 +186,7 @@ function goTrade(item: TradeItem) {
   background: #fff; border-radius: 12px; padding: 20px; text-align: center;
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
-.stat-num { display: block; font-size: 24px; font-weight: 700; color: #2b7a4b; }
+.stat-num { display: block; font-size: 24px; font-weight: 700; color: #059669; }
 .stat-label { font-size: 13px; color: #7a8a9e; margin-top: 4px; }
 .error-banner {
   background: #ffebee; color: #c62828; padding: 12px 20px; border-radius: 10px;

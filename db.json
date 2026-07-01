@@ -90,6 +90,19 @@
       "status": "open",
       "description": "华为手机12",
       "id": "6cFVrfUfFTg"
+    },
+    {
+      "title": "自行车",
+      "category": "生活用品",
+      "price": 10000,
+      "condition": "九成新",
+      "location": "C201",
+      "publisher": "校园用户",
+      "publishTime": "2026-07-01 01:44",
+      "image": "",
+      "status": "在售",
+      "description": "骑上后能跑出200m/s。",
+      "id": "5KmXM-evyJw"
     }
   ],
   "lostFounds": [
@@ -320,6 +333,18 @@
       "status": "待接单",
       "description": "送资料",
       "id": "r536PU5uXnE"
+    },
+    {
+      "title": "打印资料",
+      "taskType": "代送",
+      "reward": 20,
+      "from": "打印室",
+      "to": "A112",
+      "deadline": "2026-07-02T10:11",
+      "publisher": "校园用户",
+      "status": "待接单",
+      "description": "帮忙打印资料，并送过来。",
+      "id": "gDMJCFNcPIM"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

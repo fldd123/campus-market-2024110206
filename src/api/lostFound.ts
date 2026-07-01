@@ -10,6 +10,7 @@ export interface LostFoundItem {
   contact: string
   status: string
   description: string
+  publisher?: string
 }
 
 export function getLostFounds() {

@@ -1,13 +1,18 @@
 <template>
   <section class="page">
     <div class="page-header">
-      <h1>跑腿委托</h1>
+      <div class="page-header__title">
+        <Van aria-hidden="true" style="color:#0d9488;width:14px;height:14px;flex-shrink:0;display:block" />
+        <h1>跑腿委托</h1>
+      </div>
       <p>发布或接单跑腿任务，互帮互助便利校园生活。</p>
     </div>
 
     <div v-if="error" class="error">{{ error }}</div>
 
-    <EmptyState v-if="!loading && !error && !errands.length" text="暂无跑腿任务" />
+    <div v-if="loading" class="loading">加载中...</div>
+
+    <EmptyState v-else-if="!error && !errands.length" text="暂无跑腿任务" />
 
     <div v-else-if="errands.length" class="list">
       <ItemCard
@@ -18,6 +23,7 @@
         :tag="item.taskType"
         :location="`${item.from} → ${item.to}`"
         :time="item.deadline"
+        color="teal"
       >
         <template #footer>
           <strong>￥{{ item.reward }}</strong>
@@ -60,11 +66,21 @@ onMounted(async () => {
 .page-header {
   padding: 24px;
   border-radius: 16px;
-  background: #fff;
+  background: linear-gradient(135deg, #f0fdfa, #fff);
+  border-left: 4px solid #0d9488;
 }
 
-.page-header h1 {
-  margin: 0 0 8px;
+.page-header__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.page-header__title h1 {
+  margin: 0;
+  color: #0f766e;
 }
 
 .page-header p {

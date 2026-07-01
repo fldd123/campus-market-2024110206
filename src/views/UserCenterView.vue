@@ -1,70 +1,241 @@
-<script setup lang="ts"></script>
-
 <template>
-  <div class="page">
-    <div class="profile-header">
-      <div class="profile-avatar"></div>
-      <h2>张同学</h2>
-      <p class="profile-meta">信息科学与工程学院 · 大三</p>
-      <div class="profile-stats">
-        <div><span>12</span>发布</div>
-        <div><span>8</span>成交</div>
-        <div><span>5.0</span>评分</div>
+  <section class="page">
+    <div class="profile-card">
+      <div class="avatar">
+        <UserFilled aria-hidden="true" style="width:24px;height:16px" />
+      </div>
+
+      <div>
+        <h1>{{ userStore.displayName }}</h1>
+        <p>{{ userStore.userDescription }}</p>
+        <p>{{ userStore.currentUser.bio }}</p>
       </div>
     </div>
 
-    <div class="menu-group">
-      <div class="menu-item">
-        <span class="menu-icon">📋</span>
-        <span>我的发布</span>
-        <span class="menu-arrow">›</span>
-      </div>
-      <div class="menu-item">
-        <span class="menu-icon">❤️</span>
-        <span>我的收藏</span>
-        <span class="menu-arrow">›</span>
-      </div>
-      <div class="menu-item">
-        <span class="menu-icon">💬</span>
-        <span>交易记录</span>
-        <span class="menu-arrow">›</span>
-      </div>
-      <div class="menu-item">
-        <span class="menu-icon">⚙️</span>
-        <span>账号设置</span>
-        <span class="menu-arrow">›</span>
-      </div>
-      <div class="menu-item">
-        <span class="menu-icon">ℹ️</span>
-        <span>关于我们</span>
-        <span class="menu-arrow">›</span>
+    <div v-if="loading" class="loading">加载中...</div>
+
+    <div class="panel">
+      <h2><Star aria-hidden="true" style="color:#f59e0b;width:14px;height:14px;flex-shrink:0" /> 我的收藏</h2>
+
+      <EmptyState
+        v-if="favoriteStore.favorites.length === 0"
+        text="暂无收藏内容"
+      />
+
+      <div v-else class="favorite-list">
+        <ItemCard
+          v-for="item in favoriteStore.favorites"
+          :key="`${item.type}-${item.id}`"
+          :title="item.title"
+          :description="item.description"
+          :tag="getTypeLabel(item.type)"
+          :location="item.location"
+        >
+          <template #footer>
+            <button class="remove-btn" @click="favoriteStore.removeFavorite(item.type, item.id)">
+              取消收藏
+            </button>
+          </template>
+        </ItemCard>
       </div>
     </div>
-  </div>
+
+    <div class="panel">
+      <h2><Document aria-hidden="true" style="color:#059669;width:14px;height:14px;flex-shrink:0" /> 我的发布 ({{ myPublishes.length }})</h2>
+
+      <EmptyState
+        v-if="myPublishes.length === 0"
+        text="暂无发布内容"
+      />
+
+      <div v-else class="favorite-list">
+        <ItemCard
+          v-for="item in myPublishes"
+          :key="`${item.type}-${item.id}`"
+          :title="item.title"
+          :description="item.description"
+          :tag="getTypeLabel(item.type)"
+          :location="item.location"
+          :time="item.time"
+        />
+      </div>
+    </div>
+  </section>
 </template>
 
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import EmptyState from '../components/EmptyState.vue'
+import ItemCard from '../components/ItemCard.vue'
+import { useFavoriteStore } from '../stores/favorite'
+import { useUserStore } from '../stores/user'
+import { getTrades, type TradeItem } from '../api/trade'
+import { getLostFounds, type LostFoundItem } from '../api/lostFound'
+import { getGroupBuys, type GroupBuyItem } from '../api/groupBuy'
+import { getErrands, type ErrandItem } from '../api/errand'
+
+interface MyPublishItem {
+  id: number | undefined
+  type: 'trade' | 'lostFound' | 'groupBuy' | 'errand'
+  title: string
+  description: string
+  location: string
+  time: string
+}
+
+const userStore = useUserStore()
+const favoriteStore = useFavoriteStore()
+
+const trades = ref<TradeItem[]>([])
+const lostFounds = ref<LostFoundItem[]>([])
+const groupBuys = ref<GroupBuyItem[]>([])
+const errands = ref<ErrandItem[]>([])
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const [tRes, lRes, gRes, eRes] = await Promise.all([
+      getTrades(),
+      getLostFounds(),
+      getGroupBuys(),
+      getErrands(),
+    ])
+    trades.value = tRes.data
+    lostFounds.value = lRes.data
+    groupBuys.value = gRes.data
+    errands.value = eRes.data
+  } catch {
+    // 数据加载失败时保持空数组
+  } finally {
+    loading.value = false
+  }
+})
+
+const myTrades = computed(() =>
+  trades.value.filter((item) => item.publisher === userStore.displayName),
+)
+
+const myLostFounds = computed(() =>
+  lostFounds.value.filter((item) => item.publisher === userStore.displayName),
+)
+
+const myGroupBuys = computed(() =>
+  groupBuys.value.filter((item) => item.publisher === userStore.displayName),
+)
+
+const myErrands = computed(() =>
+  errands.value.filter((item) => item.publisher === userStore.displayName),
+)
+
+const myPublishes = computed<MyPublishItem[]>(() => [
+  ...myTrades.value.map((item) => ({
+    id: item.id,
+    type: 'trade' as const,
+    title: item.title,
+    description: item.description,
+    location: item.location,
+    time: item.publishTime,
+  })),
+  ...myLostFounds.value.map((item) => ({
+    id: item.id,
+    type: 'lostFound' as const,
+    title: item.title,
+    description: item.description,
+    location: item.location,
+    time: item.eventTime,
+  })),
+  ...myGroupBuys.value.map((item) => ({
+    id: item.id,
+    type: 'groupBuy' as const,
+    title: item.title,
+    description: item.description,
+    location: item.location,
+    time: item.deadline,
+  })),
+  ...myErrands.value.map((item) => ({
+    id: item.id,
+    type: 'errand' as const,
+    title: item.title,
+    description: item.description,
+    location: `${item.from} → ${item.to}`,
+    time: item.deadline,
+  })),
+])
+
+function getTypeLabel(type: string) {
+  const map: Record<string, string> = {
+    trade: '二手交易',
+    lostFound: '失物招领',
+    groupBuy: '拼单搭子',
+    errand: '跑腿委托',
+  }
+
+  return map[type] || '校园信息'
+}
+</script>
+
 <style scoped>
-.page { max-width: 560px; margin: 0 auto; padding-bottom: 40px; }
-.profile-header {
-  text-align: center; padding: 32px 20px; background: #fff; border-radius: 16px;
-  margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
-.profile-avatar {
-  width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 12px;
-  background: linear-gradient(135deg, #66bb6a, #2b7a4b);
+
+.profile-card,
+.panel {
+  padding: 24px;
+  border-radius: 16px;
+  background: #fff;
 }
-.profile-header h2 { font-size: 20px; margin: 0 0 4px; color: #1a2332; }
-.profile-meta { font-size: 13px; color: #7a8a9e; margin: 0 0 16px; }
-.profile-stats { display: flex; justify-content: center; gap: 32px; }
-.profile-stats div { text-align: center; font-size: 12px; color: #7a8a9e; }
-.profile-stats span { display: block; font-size: 20px; font-weight: 700; color: #2b7a4b; }
-.menu-group { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
-.menu-item {
-  display: flex; align-items: center; gap: 12px; padding: 16px 20px;
-  font-size: 14px; color: #2c3e50; cursor: pointer; transition: background 0.2s;
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, #ecfdf5, #fff);
+  border-left: 4px solid #059669;
 }
-.menu-item:hover { background: #f5f7fa; }
-.menu-item + .menu-item { border-top: 1px solid #f0f2f5; }
-.menu-icon { font-size: 18px; }
-.menu-arrow { margin-left: auto; color: #bcc6d4; font-size: 18px; }
+
+.panel {
+  border-left: 4px solid #059669;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.profile-card h1,
+.panel h2 {
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-card p,
+.hint {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.favorite-list {
+  display: grid;
+  gap: 16px;
+}
+
+.remove-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  background: #fce4ec;
+  color: #e91e63;
+}
 </style>
